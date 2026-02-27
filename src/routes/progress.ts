@@ -1,15 +1,15 @@
-import express, { Response } from 'express';
+import { Router, Request, Response } from 'express';
 import pool from '../lib/db';
 import { verifyToken, AuthRequest } from '../middleware/authMiddleware';
 
-const router = express.Router();
+const router = Router();
 
 /**
  * Save progress
  */
-router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
+router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as AuthRequest).user?.id;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -26,8 +26,8 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
     );
 
     return res.json({ message: 'Progress saved' });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: 'Server error' });
   }
 });
@@ -35,9 +35,9 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
 /**
  * Get progress
  */
-router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
+router.get('/', verifyToken, async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as AuthRequest).user?.id;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -49,8 +49,8 @@ router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
     );
 
     return res.json(result.rows);
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({ message: 'Server error' });
   }
 });

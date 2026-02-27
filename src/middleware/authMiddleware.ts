@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
 }
 
 export const verifyToken = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -27,7 +27,8 @@ export const verifyToken = (
       process.env.JWT_SECRET as string
     ) as { id: number; email: string };
 
-    req.user = decoded;
+    (req as AuthRequest).user = decoded;
+
     next();
   } catch {
     return res.status(401).json({ message: 'Invalid token' });
