@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { generateFlashcards, generateProjectGuide, generateQuiz, generateSubTopicExplanation } from '../services/geminiService.js';
-import { verifyToken } from '../middleware/auth.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 

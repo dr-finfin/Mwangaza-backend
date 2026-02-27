@@ -1,46 +1,57 @@
-import express from 'express';
-import pool from '../lib/db.js';
-import { verifyToken, AuthRequest } from '../middleware/auth.js';
+import express, { Response } from 'express';
+import pool from '../lib/db';
+import { verifyToken, AuthRequest } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.get('/', verifyToken, async (req: AuthRequest, res) => {
+/**
+ * Save progress
+ */
+router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const result = await pool.query('SELECT * FROM progress WHERE user_id = $1', [userId]);
-    res.json(result.rows);
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { lesson_id, lesson_name, completed, score } = req.body;
+
+    await pool.query(
+      `
+      INSERT INTO progress (user_id, lesson_id, lesson_name, completed, score)
+      VALUES ($1, $2, $3, $4, $5)
+      `,
+      [userId, lesson_id, lesson_name, completed, score]
+    );
+
+    return res.json({ message: 'Progress saved' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server Error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
-router.post('/', verifyToken, async (req: AuthRequest, res) => {
-  const { lesson_id, lesson_name, completed, score } = req.body;
-  const userId = req.user?.id;
-
+/**
+ * Get progress
+ */
+router.get('/', verifyToken, async (req: AuthRequest, res: Response) => {
   try {
-    const existing = await pool.query(
-      'SELECT id FROM progress WHERE user_id = $1 AND lesson_id = $2',
-      [userId, lesson_id]
-    );
+    const userId = req.user?.id;
 
-    if (existing.rows.length > 0) {
-      await pool.query(
-        'UPDATE progress SET completed = $1, score = $2, lesson_name = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
-        [completed ?? false, score ?? null, lesson_name ?? null, existing.rows[0].id]
-      );
-    } else {
-      await pool.query(
-        'INSERT INTO progress (user_id, lesson_id, lesson_name, completed, score) VALUES ($1, $2, $3, $4, $5)',
-        [userId, lesson_id, lesson_name ?? null, completed ?? false, score ?? null]
-      );
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    res.json({ msg: 'Progress updated' });
+    const result = await pool.query(
+      'SELECT * FROM progress WHERE user_id = $1',
+      [userId]
+    );
+
+    return res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server Error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
