@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js';
 import progressRouter from './routes/progress.js';
 import topicsRouter from './routes/topics.js';
 import chatRouter from './routes/chat.js';
+import streaksRouter from './routes/streaks.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/topics', topicsRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/streaks', streaksRouter);
 
 app.listen(PORT, () => {
   console.log(`Mwangaza server running on port ${PORT}`);
